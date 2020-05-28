@@ -1,0 +1,44 @@
+#R 환경에서의 크롤링은 rvest package를 이용할 수 있다.
+#뉴스 기사내용을 추출하는 과정으로 rvest를 활용해본다.
+
+library(rvest)
+#library(dplyr)
+
+#<-기호는 어떠한 변수에 값을 넣으라는 뜻이다.
+#<- NULL은 empty space를 뜻한다.
+base_url <- 'https://news.naver.com/main/list.nhn?mode=LS2D&mid=shm&sid2=771&sid1=101&date=20200430&page='
+urls <- NULL
+
+for(x in 1:2){
+  urls[x] <- paste0(base_url, x)
+  #paste0(,) 띄어쓰기 없이 문장을 붙여준다.
+}
+
+#html1 <- read_html(urls[1]) #url[1]의 html을 변수 html1에 저장
+#html2 <- html_nodes(html1, '.content') #html node 중 content 클래스 하위 모두 html2에 저장
+#html3 <- html_nodes(html2, 'a') #실질적으로 필요한 a로 끝나는 부분을 추출하는 과정을 html3에 저장
+
+#links <- html_attr(html3,'href') #링크만 남기는 작업을 하기위해 herf의 주소만을 가져옴
+#위와 같은 긴 코드를 간략하게 만들어주는 pipe
+#install.packages('dplyr') 코드를 통해 설치해주고 라이브러리로 불러줌
+#links <- html1 %>% html_nodes('.content') %>% html_nods('a') %>% html_attr('href')
+#위와 같이 간략히 작성할 수 있음
+
+#제목에만 링크가 있는 것이아니라 이미지를 통해 접근이 가능하므로 중복된 링크를 제거해주는 기능을 사용해야함
+#links <- unique(links)
+#불필요한 자료가 함께 들어가 있다면 grep("string", links)를 통해 제거 해줌
+#links[-grep("string",links)]를 입력하도록 함.
+
+links <- NULL
+for(url in urls){
+  html <- read_html(url)
+  links <- c(links, html1 %>% html_nodes('.content') %>% html_nodes('a') %>% html_attr('href') %>% unique())
+#c(,)는 links라는 변수에 자료를 계속 더하라는 뜻임
+}
+links <- links[grep("http", links)]
+
+txts <- NULL
+for(link in links){
+  html <- read_html(link)
+  txts <- c(txts, html %>% html_nodes('#articleBodyContents') %>% html_text())
+}
