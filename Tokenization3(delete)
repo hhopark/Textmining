@@ -1,0 +1,6 @@
+# 등장 빈도가 작거나 길이가 짧은 단어를 삭제하는 것만으로도 좋은 정제, 정규화 효과를 지닌다.
+# re package를 이용하여 불필요한 단어를 삭제할 수 있다.
+import re
+text = "I was wondering if anyone out there could enlighten me on this car."
+shortword = re.compile(r'\W*\b\w{1,2}\b')
+print(shortword.sub('', text))
