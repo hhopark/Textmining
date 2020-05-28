@@ -1,0 +1,37 @@
+"""
+사이킷런은 TF-IDF를 자동 계산해주는 TfidVectorizer를 제공하는데, 우리가 윗 장에서 배웠던 가중치를 적용하는 식과 조금은 상이하다. 즉, 보편적인 TF-IDF 식에서 좀 더 조정된 다른 식을 사용한다.
+하지만 여전히 TF-IDF가 가진 의도를 그대로 갖고 있으므로 사이킷런의 TF-IDF를 그대로 사용해도 괜찮다.
+"""
+
+from sklearn.feature_extraction.text import CountVectorizer
+#DTM 만들기
+
+corpus = [
+    'you know I want your love',
+    'I like you',
+    'what should I do ',
+]
+vector = CountVectorizer()
+print(vector.fit_transform(corpus).toarray())
+# 코퍼스로부터 각 단어의 빈도 수를 기록
+
+print(vector.vocabulary_)
+# 각 단어의 인덱스가 어떻게 부여되었는지를 보여줌
+[[0 1 0 1 0 1 0 1 1]
+ [0 0 1 0 0 0 0 1 0]
+ [1 0 0 0 1 0 1 0 0]]
+{'you': 7, 'know': 1, 'want': 5, 'your': 8, 'love': 3, 'like': 2, 'what': 6, 'should': 4, 'do': 0}
+
+>> 해당하는 단어 옆의 숫자는 인덱스를 나타낸다. 인덱스는 열의 번호라고 생각하면 된다.
+from sklearn.feature_extraction.text import TfidfVectorizer
+#TF-IDF 실습, TF-IDF를 자동 계산해주는 TfidfVectorizer
+
+corpus = [
+    'you know I want your love',
+    'I like you',
+    'what should I do ',
+]
+tfidfv = TfidfVectorizer().fit(corpus)
+print(tfidfv.transform(corpus).toarray())
+print(tfidfv.vocabulary_)
+
