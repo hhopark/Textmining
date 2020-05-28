@@ -1,0 +1,12 @@
+"""
+표준으로 쓰이고 있는 토큰화 방법 중 하나인 Penn Treebank Tokenizaion의 규칙으로 코딩한다.
+규칙1. 하이푼으로 구성된 단어는 하나로 유지한다.
+규칙2. Dosen't와 같이 아포스트로피가 함께하는 단어는 분리한다.
+"""
+
+from nltk.tokenize import TreebankWordTokenizer
+tokenizer = TreebankWordTokenizer()
+text = "Starting a home-based restaurant may be an ideal. it doesn't have a food chain or restaurant of their own."
+print(tokenizer.tokenize(text))
+
+>> ['Starting', 'a', 'home-based', 'restaurant', 'may', 'be', 'an', 'ideal.', 'it', 'does', "n't", '
