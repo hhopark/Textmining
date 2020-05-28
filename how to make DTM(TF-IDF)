@@ -1,0 +1,62 @@
+"""
+ TF-IDF는 이들을 곱하여 수치적으로 표현할 수 있다. 예를 들어 문서1에서는 ‘교수님’을 한 번 언급했고, 문서2에서는 ‘교수님’을 두 번 언급했다면 문서2에서 ‘교수님’의 중요성이 문서1보다 크다고 판단한다.
+ 다음은 TF-IDF를 적용, Python을 이용해 DTM을 구현해보고자 한다.
+
+"""
+
+import pandas as pd # 데이터 프레임의 사용을 위해 'pandas'이용
+                    # 표와 같은 틀을 제공한다고 생각하자.
+from math import log # 가중치 계산을 위한 log를 사용할 수 있도록 한다.
+
+docs = ['Base oils are used to manufacture products including lubricating greases, motor oil and metal processing fluids. Different products require different compositions and properties in the oil. One of the most important factors is the liquid’s viscosity at various temperatures. Whether or not a crude oil is suitable to be made into a base oil is determined by the concentration of base oil molecules as well as how easily these can be extracted.',
+         'Base oil is produced by means of refining crude oil. This means that crude oil is heated in order that various distillates can be separated from one another. During the heating process, light and heavy hydrocarbons are separated – the light ones can be refined to make petrol and other fuels, while the heavier ones are suitable for bitumen and base oils',
+         'There are large numbers of crude oils all around the world that are used to produce base oils. The most common one is a type of paraffinic crude oil, although there are also naphthenic crude oils that create products with better solubility and very good properties at low temperatures. By using hydrogenation technology, in which sulfur and aromatics are removed using hydrogen under high pressure, you can obtain extremely pure base oils, which are suitable when quality requirements are particularly stringent.']
+
+vocab = list(set(w for doc in docs for w in doc.split()))
+vocab.sort() #sort()는 오름차순 정렬을 뜻한다.
+
+N = len(docs) #문서의 수
+#아래 코드는 TF와 IDF를 구현하는 함수
+def tf(t, d):
+    return d.count(t)
+
+def idf(t):
+    df = 0
+    for doc in docs:
+        df += t in doc
+    return log(N/(df + 1))
+
+def tfidf(t, d):
+    return tf(t, d) * idf(t)
+
+#DTM을 데이터 프레임에 저장하여 출력
+result = []
+for i in range(N):
+    result.append([])
+    d = docs[i]
+    for j in range(len(vocab)):
+        t = vocab[j]
+        result[-1].append(tf(t, d))
+
+tf_ = pd.DataFrame(result, columns = vocab)
+
+#idf를 데이터 프레임에 저장하여 출력
+result = []
+for j in range(len(vocab)):
+    t = vocab[j]
+    result.append(idf(t))
+
+idf_ = pd.DataFrame(result, index= vocab, columns= ["IDF"])
+
+#각 idf가 문서 1~3에 어떠한 비중으로 자리하고 있는지 확인
+result = []
+for i in range(N):
+    result.append([])
+    d = docs[i]
+    for j in range(len(vocab)):
+        t = vocab[j]
+
+        result[-1].append(tfidf(t, d))
+
+tfidf_ = pd.DataFrame(result, columns=vocab)
+tfidf_.to_csv(('dtm.csv'))
