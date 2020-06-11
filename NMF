@@ -1,0 +1,10 @@
+mport mglearn
+import matplotlib
+import matplotlib.pyplot as plt
+
+plt.rcParams['axes.unicode_minus'] = False # 축- 설정
+
+matplotlib.rc('font', family='AppleGothic') 
+mglearn.plots.plot_nmf_illustration()
+
+plt.show() # 그래프 출력
