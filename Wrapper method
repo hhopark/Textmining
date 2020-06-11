@@ -1,0 +1,71 @@
+import pandas as pd
+import numpy as np
+from sklearn.model_selection import train_test_split
+from sklearn.feature_selection import VarianceThreshold
+
+#데이터 전처리 과정 > 데이터는 kaggle의 공유 데이터를 이용했다.
+#---------------------------------------------------------------------------------------------------------------------
+paribas_data = pd.read_csv("train.csv", nrows=20000)
+paribas_data.shape #array의 크기를 확인할 수 있다 (행=20000, 열=132)
+#print(paribas_data.shape)
+
+num_colums = ['int16', 'int32', 'int64', 'float16', 'float32', 'float64']
+#num_colums를 해당 코드와 같은 array로 지정
+#int16은 정수의 ~까지를 포함하는수
+#int16, int32와 같이 type을 설정해주는 경우로 해석할 수 있다.
+
+numerical_columns = list(paribas_data.select_dtypes(include=num_colums).columns)
+#print(numerical_columns)
+#위 코드는 숫자로 구성된 columns만을 추출하는 작업으로 paribas_data에서 num_colunms에 해당하는 columns를 찾아 반환한다.
+
+paribas_data = paribas_data[numerical_columns]
+#paribas_data를 paribas_data의 numerical_columns에 해당하는 값만으로 다시 저장
+paribas_data.shape #array의 크기를 확인할 수 있다 (행=20000, 열=113) > 초기 값에서 열의 개수가 줄어들었음을 확인할 수 있다.
+#print(paribas_data)
+
+train_features, test_features, train_labels, test_labels = train_test_split(
+    paribas_data.drop(labels=['ID', 'target'], axis=1),
+    paribas_data['target'],
+    test_size=0.2,
+    random_state=41
+)
+
+correlated_features = set() #set()은 집합을 의미하는 함수이다.
+correlation_matrix = paribas_data.corr() #corr()은 상관관계를 분석해주는 함수이다.
+
+for i in range(len(correlation_matrix .columns)): #상관관계 분석 matrix의 열 수 만큼 반복하여
+    for j in range(i):
+        if abs(correlation_matrix.iloc[i, j]) > 0.8: #각 인덱스에 해당하는 값의 절댓값이 0.8보다 크면
+            colname = correlation_matrix.columns[i] #colname에 i번째 colunm이름을
+            correlated_features.add(colname) # correlated_features.add(colname) > correlated_features에 colname에 해당하는 값 저장
+
+train_features.drop(labels=correlated_features, axis=1, inplace=True)
+test_features.drop(labels=correlated_features, axis=1, inplace=True)
+
+train_features.shape, test_features.shape
+#---------------------------------------------------------------------------------------------------------------------
+
+from sklearn.ensemble import RandomForestRegressor, RandomForestClassifier
+from sklearn.metrics import roc_auc_score
+
+from mlxtend.feature_selection import SequentialFeatureSelector
+
+feature_selector = SequentialFeatureSelector(RandomForestClassifier(n_jobs=-1),
+           k_features=15,
+           forward=True,
+           verbose=2,
+           scoring='roc_auc',
+           cv=4)
+
+features = feature_selector.fit(np.array(train_features.fillna(0)), train_labels)
+filtered_features= train_features.columns[list(features.k_feature_idx_)]
+filtered_features
+
+clf = RandomForestClassifier(n_estimators=100, random_state=41, max_depth=3)
+clf.fit(train_features[filtered_features].fillna(0), train_labels)
+
+train_pred = clf.predict_proba(train_features[filtered_features].fillna(0))
+print('Accuracy on training set: {}'.format(roc_auc_score(train_labels, train_pred[:,1])))
+
+test_pred = clf.predict_proba(test_features[filtered_features].fillna(0))
+print('Accuracy on test set: {}'.format(roc_auc_score(test_labels, test_pred [:,1])))
